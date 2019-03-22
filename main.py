@@ -1,6 +1,7 @@
 
 import pandas as pd
 import matplotlib.pyplot as plt
+import sklearn as sk
 
 education = pd.read_excel('data/Data_Extract_From_Education_Statistics_-_All_Indicators.xlsx',index_col=0, sheet_name="Data",parse_cols="A,C:G")
 
@@ -28,3 +29,24 @@ plt.show()
 plt.plot(income.replace("..",0))
 plt.legend(income.columns)
 plt.show()
+data = []
+print(population.index)
+for c in population.columns:
+    for y in population.index:
+       # print(population.loc[y,c])
+        newdata ={"Year":y,"population":population.loc[y,c],"income":income.loc[y,c],"education":education.loc[y,c],"country":c}
+        newSeries = pd.Series(newdata,index=["Year","population","income","education","country"])
+        print(newSeries)
+        data.append(newSeries)
+newDataFrame = pd.DataFrame(data)
+
+from sklearn.cluster import KMeans
+
+without = newDataFrame.drop(["country","Year"],axis=1)
+
+from sklearn.preprocessing import StandardScaler
+scaled = StandardScaler().fit_transform(without.replace("..",0))
+pred = KMeans(n_clusters=4).fit_predict(scaled)
+
+result = newDataFrame["cluster"] = pd.Series(pred, index=newDataFrame.index)
+print(result)
